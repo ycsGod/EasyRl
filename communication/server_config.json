@@ -1,0 +1,6 @@
+{
+  "create_env_url": "http://127.0.0.1:5000/create_env",
+  "env_reset_url": "http://127.0.0.1:5000/reset_env",
+  "env_step_url": "http://127.0.0.1:5000/step_env",
+  "env_stop_url": "http://127.0.0.1:5000/stop_env"
+}
