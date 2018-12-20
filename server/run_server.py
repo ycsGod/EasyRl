@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from flask import Flask, request
-from EasyRL.communication.message_processing import MSGProcessing
-from EasyRL.communication.message import Message
+from communication.message_processing import MSGProcessing
+from communication.message import Message
 import gym
-from EasyRL.environment.environment_manager import EnvManager
+from environment.environment_manager import EnvManager
 
 app = Flask(__name__)
 
@@ -21,7 +21,7 @@ def create_env():
 def reset_env():
     msg = MSGProcessing.deserialization(request.data)
     assert msg.is_reset is True
-    env_id = msg.end_id
+    env_id = msg.env_id
     env = env_manager.env_dict[env_id]
     initial_observation = env.reset()
     msg = Message(env_id=env_id, initial_observation=initial_observation)
@@ -32,7 +32,9 @@ def reset_env():
 def env_step():
     msg = MSGProcessing.deserialization(request.data)
     action = msg.action
-    env_id = msg.end_id
+    # print "action: {}".format(action)
+    env_id = msg.env_id
+    # print "env_id: {}".format(env_id)
     env = env_manager.env_dict[env_id]
     observation, reward, is_terminal, _ = env.step(action)
     msg = Message(observation=observation, reward=reward, is_terminal=is_terminal)
@@ -44,9 +46,18 @@ def env_stop():
     env_id = MSGProcessing.deserialization(request.data).env_id
     env = env_manager.env_dict[env_id]
     env.close()
-    env_manager.env_dict.pop(env_id)
     env_manager.delete_env(env_id)
-    return None
+    msg = Message(env_id=env_id, is_terminal=True)
+    return MSGProcessing.serialization(msg)
+
+
+@app.route('/env_render', methods=['POST'])
+def env_render():
+    env_id = MSGProcessing.deserialization(request.data).env_id
+    env = env_manager.env_dict[env_id]
+    env.render()
+    msg = Message(env_id=env_id)
+    return MSGProcessing.serialization(msg)
 
 
 if __name__ == '__main__':

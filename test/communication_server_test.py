@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from flask import Flask, request
-from EasyRL.communication.message import Message
-from EasyRL.communication.message_processing import MSGProcessing
+from communication.message import Message
+from communication.message_processing import MSGProcessing
 import gym
-from EasyRL.environment.environment_manager import EnvManager
+from environment.environment_manager import EnvManager
 
 app = Flask(__name__)
 

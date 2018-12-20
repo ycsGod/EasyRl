@@ -5,7 +5,7 @@ import uuid
 
 class EnvManager(object):
     def __init__(self):
-        self._ID_list = []
+        self._ID_list = set()
         self._env_dict = {}
 
     '''
@@ -15,9 +15,9 @@ class EnvManager(object):
         while True:
             env_id = str(uuid.uuid4())
             if env_id not in self._ID_list:
-                self._ID_list.append(env_id)
+                self._ID_list.add(env_id)
                 self._env_dict[env_id] = env
-                print "Successfully add env(env_id={}, env_dict={})".format(env_id, self._env_dict)
+                print "Successfully add env(env_id={})".format(env_id)
                 return env_id
 
     '''
@@ -25,9 +25,9 @@ class EnvManager(object):
     '''
     def delete_env(self, env_id):
         if env_id in self._ID_list:
-            self._ID_list.pop(env_id)
-            self._env_dict.pop(env_id)
-            print "Successfully delete env(env_id={}, env_dict={})".format(env_id, self._env_dict)
+            self._ID_list.remove(env_id)
+            del self._env_dict[env_id]
+            print "Successfully delete env(env_id={})".format(env_id)
 
     @property
     def env_dict(self):

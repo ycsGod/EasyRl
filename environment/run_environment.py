@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
 
-from EasyRL.communication.message_processing import MSGProcessing
-from EasyRL.communication.message import Message
+from communication.message_processing import MSGProcessing
+from communication.message import Message
+from communication.config import Config
 
 
 class Runner(object):
     def __init__(self,
+                 config,
                  create_agent_function,
                  game_name=None,
-                 episodes=200,
+                 episodes=2000,
                  max_steps_per_episode=27000):
         assert game_name is not None
 
+        self._config = config
         self._env_id = None
         self._episode = episodes
         self._max_steps_per_episode = max_steps_per_episode
@@ -20,22 +23,19 @@ class Runner(object):
 
     def _create_env_function(self, game_name):
         msg = Message(game_name=game_name)
-        result = MSGProcessing.send(MSGProcessing.CREATE_ENV_URL, msg)
-        msg = MSGProcessing.deserialization(result)
-        self._env_id = msg.env_id
-        return msg.action_space
+        result = MSGProcessing.send(self._config.create_env_url, msg)
+        self._env_id = result.env_id
+        return result.action_space
 
     def _env_reset(self):
         msg = Message(env_id=self._env_id, is_reset=True)
-        result = MSGProcessing.send(MSGProcessing.RESET_ENV_URL, msg)
-        msg = MSGProcessing.deserialization(result)
-        return msg.initial_observation
+        result = MSGProcessing.send(self._config.reset_env_url, msg)
+        return result.initial_observation
 
     def _env_step(self, action):
         msg = Message(env_id=self._env_id, action=action)
-        result = MSGProcessing.send(MSGProcessing.ENV_STEP_URL, msg)
-        msg = MSGProcessing.deserialization(result)
-        return msg.observation, msg.reward, msg.is_terminal
+        result = MSGProcessing.send(self._config.env_step_url, msg)
+        return result.observation, result.reward, result.is_terminal
 
     def _initial_episode(self):
         initial_observation = self._env_reset()
@@ -53,6 +53,8 @@ class Runner(object):
         action = self._initial_episode()
 
         while True:
+            # self.env_render()
+
             # 环境执行action，返回observation, reward和终止状态
             observation, reward, is_terminal = self._run_one_step(action)
 
@@ -61,14 +63,17 @@ class Runner(object):
             if is_terminal or step_number == self._max_steps_per_episode:
                 break
             else:
-                # 更新ｑ表，返回下一步action
                 action = self._agent.step(reward, observation)
 
         print "Steps executed: {}".format(step_number)
 
     def destroy_env(self):
         msg = Message(env_id=self._env_id)
-        MSGProcessing.send(MSGProcessing.ENV_STOP_URL, msg)
+        MSGProcessing.send(self._config.env_stop_url, msg)
+
+    def env_render(self):
+        msg = Message(env_id=self._env_id)
+        MSGProcessing.send(self._config.env_render_url, msg)
 
     def run(self):
         print "Beginning training......"

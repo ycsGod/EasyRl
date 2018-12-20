@@ -3,23 +3,14 @@
 import requests
 import json
 from message import Message
+from config import Config
 
 
 class MSGProcessing(object):
-    CREATE_ENV_URL = "http://127.0.0.1:5000/create_env"
-    RESET_ENV_URL = "http://127.0.0.1:5000/reset_env"
-    ENV_STEP_URL = "http://127.0.0.1:5000/step_env"
-    ENV_STOP_URL = "http://127.0.0.1:5000/stop_env"
-    __url_list = [CREATE_ENV_URL, RESET_ENV_URL, ENV_STEP_URL, ENV_STOP_URL]
 
     @staticmethod
     def send(url, msg):
-        # 应该要考虑url不对的情况
-
-        if url in MSGProcessing.__url_list:
-            return MSGProcessing.deserialization(requests.post(url, MSGProcessing.serialization(msg)).text)
-        else:
-            raise ValueError("url is not correct!")
+        return MSGProcessing.deserialization(requests.post(url, MSGProcessing.serialization(msg)).text)
 
     @staticmethod
     def serialization(msg):

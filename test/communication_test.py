@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from EasyRL.communication.message import Message
-from EasyRL.communication.message_processing import MSGProcessing
+from communication.message import Message
+from communication.message_processing import MSGProcessing
 
 
 if __name__ == '__main__':
